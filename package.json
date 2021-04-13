@@ -1,0 +1,7 @@
+{
+  "name": "new-company",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Tomasz Kopacki",
+  "license": "MIT"
+}

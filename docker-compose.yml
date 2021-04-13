@@ -1,0 +1,42 @@
+version: "3.7"
+
+services:
+  web:
+    image: new-company/web:latest
+    container_name: "nc-web"
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.website.rule=Host(`www.localhost`)
+      - traefik.http.routers.website.entrypoints=unsecure-web
+      - traefik.http.routers.website.service=svc-website
+      - traefik.http.services.svc-website.loadbalancer.server.port=3000
+  api:
+    image: new-company/api:latest
+    container_name: "nc-api"
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.web-api.rule=Host(`api.localhost`)
+      - traefik.http.routers.web-api.entrypoints=unsecure-web
+      - traefik.http.routers.web-api.service=svc-web-api
+      - traefik.http.services.svc-web-api.loadbalancer.server.port=3000
+  
+  traefik:
+    image: "traefik:2.4.8"
+    container_name: "nc-traefik"
+    restart: always
+    depends_on:
+      - "web"
+      - "api"
+    command:
+      - --accesslog
+      - --log.level=DEBUG
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.unsecure-web.address=:80
+    ports:
+      - "80:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    
